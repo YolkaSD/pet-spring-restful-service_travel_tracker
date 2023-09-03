@@ -1,8 +1,12 @@
 package com.example.people_tracker.repositories;
 
+import com.example.people_tracker.models.ClientDTO;
 import com.example.people_tracker.models.TravelDTO;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public class DaoImpl implements DaoTravel {
@@ -31,5 +35,15 @@ public class DaoImpl implements DaoTravel {
 
         jdbcTemplate.update(sql, args);
 
+    }
+
+    @Override
+    public List<ClientDTO> getClientList() {
+        String sql = """
+                SELECT DISTINCT client_id, name, surname
+                FROM store_travel.travels;
+                """;
+
+        return jdbcTemplate.query(sql, new ClientRowMapper());
     }
 }

@@ -1,8 +1,11 @@
 package com.example.people_tracker.controllers;
 
+import com.example.people_tracker.models.ClientDTO;
 import com.example.people_tracker.models.TravelDTO;
 import com.example.people_tracker.services.TravelService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class PeopleTrackerController {
@@ -15,16 +18,15 @@ public class PeopleTrackerController {
 
     @PostMapping("/travel/add")
     public String addNewTravel(@RequestBody TravelDTO travelDTO) {
-        System.out.println(travelDTO);
         travelService.add(travelDTO);
         return null;
     }
 
-//    @GetMapping("/travel/clients")
-//    public List<ClientDTO> getAllClients() {
-//        return null;
-//    }
-//
+    @GetMapping("/travel/clients")
+    public List<ClientDTO> getAllClients() {
+        return travelService.getClientList();
+    }
+
 //    @PostMapping("/travel/aggregates/calculate")
 //    public String calculateAggregates() {
 //        return null;
