@@ -8,5 +8,12 @@ import java.util.List;
 public interface TravelService {
     void add(TravelDTO travelDTO);
 
+    void addNewTravelFromList(List<TravelDTO> travelDTOList);
+
     List<ClientDTO> getClientList();
+
+    void calculateAggregatesFromDB();
+
+    void calculateAggregatesFromJava();
+
 }

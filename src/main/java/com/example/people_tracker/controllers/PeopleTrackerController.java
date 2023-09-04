@@ -22,16 +22,32 @@ public class PeopleTrackerController {
         return null;
     }
 
+    @PostMapping("/travel/addfromlist")
+    public String addNewTravelFromList(@RequestBody List<TravelDTO> travelDTOList) {
+        travelService.addNewTravelFromList(travelDTOList);
+        return null;
+    }
+
     @GetMapping("/travel/clients")
     public List<ClientDTO> getAllClients() {
         return travelService.getClientList();
     }
 
-//    @PostMapping("/travel/aggregates/calculate")
-//    public String calculateAggregates() {
+//    @PostMapping("/travel/aggregates/calculate/fromdb")
+//    public String calculateAggregatesFromDB() {
+//        long startTime = System.currentTimeMillis();
+//        travelService.calculateAggregatesFromDB();
+//        long endTime = System.currentTimeMillis();
+//        System.out.println("TimeMillis: " + (startTime - endTime));
 //        return null;
 //    }
-//
+
+    @PostMapping("/travel/aggregates/calculate/fromjava")
+    public String calculateAggregatesFromJava() {
+        travelService.calculateAggregatesFromJava();
+        return null;
+    }
+
 //    @GetMapping("/travel/{client_id}/aggregates")
 //    public ClientAggregatesDTO getClientAggregates(@PathVariable("client_id") Long clientId) {
 //        return null;
