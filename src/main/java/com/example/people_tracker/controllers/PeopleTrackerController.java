@@ -4,7 +4,6 @@ import com.example.people_tracker.models.ClientDTO;
 import com.example.people_tracker.models.TravelDTO;
 import com.example.people_tracker.services.TravelService;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController

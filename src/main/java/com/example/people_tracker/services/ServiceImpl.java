@@ -1,7 +1,7 @@
 package com.example.people_tracker.services;
 
 import com.example.people_tracker.models.*;
-import com.example.people_tracker.repositories.DaoPeopleCreator;
+import com.example.people_tracker.repositories.people_creator_rep.DaoPeopleCreator;
 import com.example.people_tracker.repositories.DaoTravel;
 import com.example.people_tracker.services.aggregate_calculator.AggregateCalculator;
 import com.example.people_tracker.services.aggregate_calculator.TravelStatistic;
@@ -107,7 +107,6 @@ public class ServiceImpl implements TravelService {
 
     @Override
     public void createPeople() {
-        long startTime = System.currentTimeMillis();
         String nameUrl = "https://raw.githubusercontent.com/YolkaSD/text_resources/master/names.txt";
         String surnameUrl = "https://raw.githubusercontent.com/YolkaSD/text_resources/master/surnames.txt";
         String cityUrl = "https://raw.githubusercontent.com/YolkaSD/text_resources/master/worldcities.txt";
@@ -118,7 +117,8 @@ public class ServiceImpl implements TravelService {
 
         ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-        long id = daoPeopleCreator.getMaxId();
+        long id = daoPeopleCreator.getMaxId() + 1;
+
         while (id <= 40_000) {
             String name = names.get(resourceGenerator.generateRandomValue(names.size() - 1));
             String surname = surnames.get(resourceGenerator.generateRandomValue(surnames.size() - 1));
@@ -136,8 +136,8 @@ public class ServiceImpl implements TravelService {
                 executorService.submit(new Runnable() {
                     @Override
                     public void run() {
-                        String departureCityName = names.get(resourceGenerator.generateRandomValue(cities.size() - 1));
-                        String destinationCityName = names.get(resourceGenerator.generateRandomValue(cities.size() - 1));
+                        String departureCityName = cities.get(resourceGenerator.generateRandomValue(cities.size() - 1));
+                        String destinationCityName = cities.get(resourceGenerator.generateRandomValue(cities.size() - 1));
                         TransportType transportType = TransportType.values()[resourceGenerator.generateRandomValue(TransportType.values().length - 1)];
 
                         LocalDateTime departureTime = resourceGenerator.generateLocalDate(
@@ -161,11 +161,8 @@ public class ServiceImpl implements TravelService {
                 i++;
             }
             id++;
+
         }
-
-        long endTime = System.currentTimeMillis();
-
-        System.out.println(endTime - startTime);
-
+        executorService.shutdown();
     }
 }

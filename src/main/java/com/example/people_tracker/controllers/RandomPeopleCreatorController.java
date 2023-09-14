@@ -15,7 +15,11 @@ public class RandomPeopleCreatorController {
 
     @GetMapping("/peoplecreator")
     public String createPeople() {
+
+        long startTime = System.currentTimeMillis();
         service.createPeople();
+        long endTime = System.currentTimeMillis();
+        System.out.println("TimeMillis: " + (endTime - startTime));
         return null;
     }
 }

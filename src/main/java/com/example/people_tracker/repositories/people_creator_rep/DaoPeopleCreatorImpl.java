@@ -1,4 +1,4 @@
-package com.example.people_tracker.repositories;
+package com.example.people_tracker.repositories.people_creator_rep;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
