@@ -1,7 +1,6 @@
 package com.example.people_tracker.services.aggregate_calculator;
 
 import com.example.people_tracker.models.TravelDTO;
-import com.example.people_tracker.models.TravelStatistic;
 import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.stereotype.Component;
 import java.time.LocalDate;

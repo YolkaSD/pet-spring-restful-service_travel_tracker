@@ -4,6 +4,7 @@ import com.example.people_tracker.models.*;
 import com.example.people_tracker.repositories.DaoPeopleCreator;
 import com.example.people_tracker.repositories.DaoTravel;
 import com.example.people_tracker.services.aggregate_calculator.AggregateCalculator;
+import com.example.people_tracker.services.aggregate_calculator.TravelStatistic;
 import com.example.people_tracker.services.people_creator.ResourceGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

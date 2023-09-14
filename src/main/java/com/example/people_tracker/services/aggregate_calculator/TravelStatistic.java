@@ -1,4 +1,4 @@
-package com.example.people_tracker.models;
+package com.example.people_tracker.services.aggregate_calculator;
 
 import lombok.Data;
 
