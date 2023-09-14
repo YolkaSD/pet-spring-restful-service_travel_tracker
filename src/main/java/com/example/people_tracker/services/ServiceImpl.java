@@ -14,7 +14,6 @@ import java.util.*;
 import java.util.concurrent.*;
 
 
-
 @Service
 public class ServiceImpl implements TravelService {
 
@@ -116,6 +115,7 @@ public class ServiceImpl implements TravelService {
         List<String> surnames = resourceGenerator.fetchFromURL(surnameUrl);
         List<String> cities = resourceGenerator.fetchFromURL(cityUrl);
 
+        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         long id = daoPeopleCreator.getMaxId();
         while (id <= 40_000) {
@@ -130,31 +130,33 @@ public class ServiceImpl implements TravelService {
             travelDTO.setBirthday(birthDay);
 
             int i = 1;
-            String departureCityName;
-            String destinationCityName;
-            TransportType transportType;
-            LocalDateTime departureTime;
-            LocalDateTime destinationTime;
             while (i <= 25) {
-                departureCityName = names.get(resourceGenerator.generateRandomValue(cities.size() - 1));
-                destinationCityName = names.get(resourceGenerator.generateRandomValue(cities.size() - 1));
-                transportType = TransportType.values()[resourceGenerator.generateRandomValue(TransportType.values().length - 1)];
 
-                departureTime = resourceGenerator.generateLocalDate(
-                        travelDTO.getBirthday().getYear() + 10, 2015,
-                        1, 12,
-                        1, 31
-                ).atTime(resourceGenerator.generateRandomValue(23), resourceGenerator.generateRandomValue(59), 0);
+                executorService.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        String departureCityName = names.get(resourceGenerator.generateRandomValue(cities.size() - 1));
+                        String destinationCityName = names.get(resourceGenerator.generateRandomValue(cities.size() - 1));
+                        TransportType transportType = TransportType.values()[resourceGenerator.generateRandomValue(TransportType.values().length - 1)];
 
-                destinationTime = LocalDateTime.from(departureTime).plusDays(resourceGenerator.generateRandomValue(30)).plusHours(30).plusMinutes(30);
+                        LocalDateTime departureTime = resourceGenerator.generateLocalDate(
+                                travelDTO.getBirthday().getYear() + 10, 2015,
+                                1, 12,
+                                1, 31
+                        ).atTime(resourceGenerator.generateRandomValue(23), resourceGenerator.generateRandomValue(59), 0);
+
+                        LocalDateTime destinationTime = LocalDateTime.from(departureTime).plusDays(resourceGenerator.generateRandomValue(30)).plusHours(30).plusMinutes(30);
 
 
-                travelDTO.setTransportType(transportType);
-                travelDTO.setDepartureCityName(departureCityName);
-                travelDTO.setDestinationCityName(destinationCityName);
-                travelDTO.setDepartureTime(departureTime);
-                travelDTO.setDestinationTime(destinationTime);
-                dao.add(travelDTO);
+                        travelDTO.setTransportType(transportType);
+                        travelDTO.setDepartureCityName(departureCityName);
+                        travelDTO.setDestinationCityName(destinationCityName);
+                        travelDTO.setDepartureTime(departureTime);
+                        travelDTO.setDestinationTime(destinationTime);
+                        dao.add(travelDTO);
+                    }
+                });
+
                 i++;
             }
             id++;

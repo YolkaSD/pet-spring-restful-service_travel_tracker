@@ -16,6 +16,6 @@ public class RandomPeopleCreatorController {
     @GetMapping("/peoplecreator")
     public String createPeople() {
         service.createPeople();
-        return "dasdasdas";
+        return null;
     }
 }
