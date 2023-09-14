@@ -1,4 +1,4 @@
-package com.example.people_tracker.services;
+package com.example.people_tracker.services.aggregate_calculator;
 
 import com.example.people_tracker.models.TravelDTO;
 import com.example.people_tracker.models.TravelStatistic;
@@ -44,10 +44,6 @@ public class AggregateCalculator {
     public TravelStatistic findTravelStatistics(List<TravelDTO> travelDTOList) {
 
         TravelStatistic travelStatistic = new TravelStatistic();
-
-        if (travelDTOList.size() < 2) {
-            return travelStatistic;
-        }
 
         int max = 0;
         int min = Integer.MAX_VALUE;

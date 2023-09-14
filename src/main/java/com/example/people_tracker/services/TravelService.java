@@ -16,4 +16,5 @@ public interface TravelService {
 
     void calculateAggregatesFromJava();
 
+    void createPeople();
 }
