@@ -44,7 +44,11 @@ public class PeopleTrackerController {
 
     @PostMapping("/travel/aggregates/calculate/fromjava")
     public String calculateAggregatesFromJava() {
+        long startTime = System.currentTimeMillis();
         travelService.calculateAggregatesFromJava();
+        long endTime = System.currentTimeMillis();
+        System.out.println("TimeMillis: " + (endTime - startTime));
+
         return null;
     }
 

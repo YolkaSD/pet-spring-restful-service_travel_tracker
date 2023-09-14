@@ -1,25 +1,35 @@
 package com.example.people_tracker.services;
 
-import com.example.people_tracker.models.AggregateDTO;
-import com.example.people_tracker.models.ClientDTO;
-import com.example.people_tracker.models.TravelDTO;
-import com.example.people_tracker.models.TravelStatistic;
+import com.example.people_tracker.models.*;
+import com.example.people_tracker.repositories.DaoPeopleCreator;
 import com.example.people_tracker.repositories.DaoTravel;
+import com.example.people_tracker.services.aggregate_calculator.AggregateCalculator;
+import com.example.people_tracker.services.people_creator.ResourceGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.List;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.*;
+
 
 
 @Service
 public class ServiceImpl implements TravelService {
 
     private final DaoTravel dao;
+    private final DaoPeopleCreator daoPeopleCreator;
     private final AggregateCalculator calculateAggregate;
+    private final ResourceGenerator resourceGenerator;
+
 
     @Autowired
-    public ServiceImpl(DaoTravel dao, AggregateCalculator calculateAggregate) {
+    public ServiceImpl(DaoTravel dao, DaoPeopleCreator daoPeopleCreator, AggregateCalculator calculateAggregate, ResourceGenerator resourceGetter) {
         this.dao = dao;
+        this.daoPeopleCreator = daoPeopleCreator;
         this.calculateAggregate = calculateAggregate;
+        this.resourceGenerator = resourceGetter;
     }
 
     @Override
@@ -44,56 +54,115 @@ public class ServiceImpl implements TravelService {
 
     @Override
     public void calculateAggregatesFromJava() {
-        // 1 - получить список client_id
-        List<Long> clientIdList = dao.getClientIdList();
-        // 2 - получить листы всех записи каждого client_id
-        clientIdList.parallelStream().forEach(clientId -> {
-            // Получить список записей для каждого client_id
-            List<TravelDTO> travelDTOList = dao.getTravelDTOList(clientId);
-            // 3 - Для каждого элемента списка выполнить расчет
-            // 3.1 - Количество перемещений всего за все время
-            int cntAllTrans = calculateAggregate.findCountAllTrans(travelDTOList);
-            // 3.2 - Количество перемещений за последний год
-            int cntAllTransOneYear = (int) calculateAggregate.findCountAllTransInLastYears(travelDTOList, 1);
-            // 3.3 - Количество перемещений за последние 5 лет
-            int cntAllTransFiveYears = calculateAggregate.findCountAllTransInLastYears(travelDTOList, 5);
-            // 3.4 - Количество перемещений до 18 лет
-            int cntAllTransBeforeEighteenYears = calculateAggregate.findCountTransByAge(travelDTOList, 18, true);
-            // 3.5 - Количество перемещений после 18 лет
-            int cntAllTransAfterEighteenYears = calculateAggregate.findCountTransByAge(travelDTOList, 18, false);
-            // 3.6 - Максимальное количество дней без перемещений
-            // 3.7 - Mинимальное количество дней без перемещений
-            // 3.8 - Среднее количество дней без перемещений
-            TravelStatistic travelStatistic = calculateAggregate.findTravelStatistics(travelDTOList);
-            int minCntOfDaysInSamePlace = travelStatistic.getMax();
-            int maxCntOfDaysInSamePlace = travelStatistic.getMin();
-            double avgCntOfDaysInSamePlace = travelStatistic.getAvg();
-            // 3.9 - Количество перемещений на машине
-            int cntAllTransCar = calculateAggregate.findCountAllTransByType(travelDTOList, "CAR");
-            // 3.10 - Количество перемещений на автобусе
-            int cntAllTransBus = calculateAggregate.findCountAllTransByType(travelDTOList, "BUS");
-            // 3.11 - Количество перемещений на самолете
-            int cntAllTransPlane = calculateAggregate.findCountAllTransByType(travelDTOList, "PLANE");
-            // 3.12 - Количество перемещений на поезде
-            int cntAllTransTrain = calculateAggregate.findCountAllTransByType(travelDTOList, "TRAIN");
+        int maxRow = dao.getMaxRowByTableTravels();
+        int step = 1500;
+        int currentStep = 0;
+        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        while (currentStep < (maxRow + step)) {
 
-            AggregateDTO aggregateDTO = new AggregateDTO();
+            List<TravelDTO> travelDTOList = dao.getTravelsByClientIdsRange(currentStep, (currentStep + step));
 
-            aggregateDTO.setClientId(clientId);
-            aggregateDTO.setCntAllTrans(cntAllTrans);
-            aggregateDTO.setCntAllTransOneYear(cntAllTransOneYear);
-            aggregateDTO.setCntAllTransFiveYears(cntAllTransFiveYears);
-            aggregateDTO.setCntAllTransBeforeEighteenYears(cntAllTransBeforeEighteenYears);
-            aggregateDTO.setCntAllTransAfterEighteenYears(cntAllTransAfterEighteenYears);
-            aggregateDTO.setMaxCntOfDaysInSamePlace(maxCntOfDaysInSamePlace);
-            aggregateDTO.setMinCntOfDaysInSamePlace(minCntOfDaysInSamePlace);
-            aggregateDTO.setAvgCntOfDaysInSamePlace(avgCntOfDaysInSamePlace);
-            aggregateDTO.setCntAllTransCar(cntAllTransCar);
-            aggregateDTO.setCntAllTransBus(cntAllTransBus);
-            aggregateDTO.setCntAllTransPlane(cntAllTransPlane);
-            aggregateDTO.setCntAllTransTrain(cntAllTransTrain);
+            for (Long clientId : travelDTOList.stream().map(TravelDTO::getClientId).distinct().toList()) {
+                executorService.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        AggregateDTO aggregateDTO = new AggregateDTO();
+                        List<TravelDTO> travelByIdList = travelDTOList.stream().filter(travelDTO -> travelDTO.getClientId().equals(clientId)).toList();
+                        int cntAllTrans = calculateAggregate.findCountAllTrans(travelByIdList);
+                        int cntAllTransOneYear = calculateAggregate.findCountAllTransInLastYears(travelByIdList, 1);
+                        int cntAllTransFiveYears = calculateAggregate.findCountAllTransInLastYears(travelByIdList, 5);
+                        int cntAllTransBeforeEighteenYears = calculateAggregate.findCountTransByAge(travelByIdList, 18, true);
+                        int cntAllTransAfterEighteenYears = calculateAggregate.findCountTransByAge(travelByIdList, 18, false);
+                        TravelStatistic travelStatistic = calculateAggregate.findTravelStatistics(travelByIdList);
+                        int minCntOfDaysInSamePlace = travelStatistic.getMax();
+                        int maxCntOfDaysInSamePlace = travelStatistic.getMin();
+                        double avgCntOfDaysInSamePlace = travelStatistic.getAvg();
+                        int cntAllTransCar = calculateAggregate.findCountAllTransByType(travelByIdList, "CAR");
+                        int cntAllTransBus = calculateAggregate.findCountAllTransByType(travelByIdList, "BUS");
+                        int cntAllTransPlane = calculateAggregate.findCountAllTransByType(travelByIdList, "PLANE");
+                        int cntAllTransTrain = calculateAggregate.findCountAllTransByType(travelByIdList, "TRAIN");
 
-            dao.calculateAggregatesFromJava(aggregateDTO);
-        });
+                        aggregateDTO.setClientId(clientId);
+                        aggregateDTO.setCntAllTrans(cntAllTrans);
+                        aggregateDTO.setCntAllTransOneYear(cntAllTransOneYear);
+                        aggregateDTO.setCntAllTransFiveYears(cntAllTransFiveYears);
+                        aggregateDTO.setCntAllTransBeforeEighteenYears(cntAllTransBeforeEighteenYears);
+                        aggregateDTO.setCntAllTransAfterEighteenYears(cntAllTransAfterEighteenYears);
+                        aggregateDTO.setMaxCntOfDaysInSamePlace(maxCntOfDaysInSamePlace);
+                        aggregateDTO.setMinCntOfDaysInSamePlace(minCntOfDaysInSamePlace);
+                        aggregateDTO.setAvgCntOfDaysInSamePlace(avgCntOfDaysInSamePlace);
+                        aggregateDTO.setCntAllTransCar(cntAllTransCar);
+                        aggregateDTO.setCntAllTransBus(cntAllTransBus);
+                        aggregateDTO.setCntAllTransPlane(cntAllTransPlane);
+                        aggregateDTO.setCntAllTransTrain(cntAllTransTrain);
+                        dao.calculateAggregatesFromJava(aggregateDTO);
+                    }
+                });
+            }
+
+            currentStep += step;
+        }
+        executorService.shutdown();
+    }
+
+    @Override
+    public void createPeople() {
+        long startTime = System.currentTimeMillis();
+        String nameUrl = "https://raw.githubusercontent.com/YolkaSD/text_resources/master/names.txt";
+        String surnameUrl = "https://raw.githubusercontent.com/YolkaSD/text_resources/master/surnames.txt";
+        String cityUrl = "https://raw.githubusercontent.com/YolkaSD/text_resources/master/worldcities.txt";
+
+        List<String> names = resourceGenerator.fetchFromURL(nameUrl);
+        List<String> surnames = resourceGenerator.fetchFromURL(surnameUrl);
+        List<String> cities = resourceGenerator.fetchFromURL(cityUrl);
+
+
+        long id = daoPeopleCreator.getMaxId();
+        while (id <= 40_000) {
+            String name = names.get(resourceGenerator.generateRandomValue(names.size() - 1));
+            String surname = surnames.get(resourceGenerator.generateRandomValue(surnames.size() - 1));
+            LocalDate birthDay = resourceGenerator.generateLocalDate(1950, 2000, 1, 12, 1, 31);
+
+            TravelDTO travelDTO = new TravelDTO();
+            travelDTO.setClientId(id);
+            travelDTO.setName(name);
+            travelDTO.setSurname(surname);
+            travelDTO.setBirthday(birthDay);
+
+            int i = 1;
+            String departureCityName;
+            String destinationCityName;
+            TransportType transportType;
+            LocalDateTime departureTime;
+            LocalDateTime destinationTime;
+            while (i <= 25) {
+                departureCityName = names.get(resourceGenerator.generateRandomValue(cities.size() - 1));
+                destinationCityName = names.get(resourceGenerator.generateRandomValue(cities.size() - 1));
+                transportType = TransportType.values()[resourceGenerator.generateRandomValue(TransportType.values().length - 1)];
+
+                departureTime = resourceGenerator.generateLocalDate(
+                        travelDTO.getBirthday().getYear() + 10, 2015,
+                        1, 12,
+                        1, 31
+                ).atTime(resourceGenerator.generateRandomValue(23), resourceGenerator.generateRandomValue(59), 0);
+
+                destinationTime = LocalDateTime.from(departureTime).plusDays(resourceGenerator.generateRandomValue(30)).plusHours(30).plusMinutes(30);
+
+
+                travelDTO.setTransportType(transportType);
+                travelDTO.setDepartureCityName(departureCityName);
+                travelDTO.setDestinationCityName(destinationCityName);
+                travelDTO.setDepartureTime(departureTime);
+                travelDTO.setDestinationTime(destinationTime);
+                dao.add(travelDTO);
+                i++;
+            }
+            id++;
+        }
+
+        long endTime = System.currentTimeMillis();
+
+        System.out.println(endTime - startTime);
+
     }
 }
