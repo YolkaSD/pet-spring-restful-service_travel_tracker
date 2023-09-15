@@ -4,11 +4,9 @@ import com.example.people_tracker.models.*;
 import com.example.people_tracker.repositories.people_creator_rep.DaoPeopleCreator;
 import com.example.people_tracker.repositories.DaoTravel;
 import com.example.people_tracker.services.aggregate_calculator.AggregateCalculator;
-import com.example.people_tracker.services.aggregate_calculator.TravelStatistic;
 import com.example.people_tracker.services.people_creator.ResourceGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -20,15 +18,13 @@ public class ServiceImpl implements TravelService {
 
     private final DaoTravel dao;
     private final DaoPeopleCreator daoPeopleCreator;
-    private final AggregateCalculator calculateAggregate;
     private final ResourceGenerator resourceGenerator;
 
 
     @Autowired
-    public ServiceImpl(DaoTravel dao, DaoPeopleCreator daoPeopleCreator, AggregateCalculator calculateAggregate, ResourceGenerator resourceGetter) {
+    public ServiceImpl(DaoTravel dao, DaoPeopleCreator daoPeopleCreator, ResourceGenerator resourceGetter) {
         this.dao = dao;
         this.daoPeopleCreator = daoPeopleCreator;
-        this.calculateAggregate = calculateAggregate;
         this.resourceGenerator = resourceGetter;
     }
 
@@ -47,19 +43,13 @@ public class ServiceImpl implements TravelService {
         return dao.getClientList();
     }
 
-
     @Override
     public AggregateDTO getAggregateByClientId(Long clientId) {
         return dao.getAggregateByClientId(clientId);
     }
 
     @Override
-    public void calculateAggregatesFromDB() {
-        dao.calculateAggregatesFromDB();
-    }
-
-    @Override
-    public void calculateAggregatesFromJava() {
+    public void calculateAggregates() {
         int maxRow = dao.getMaxRowByTableTravels();
         int step = 1500;
         int currentStep = 0;
@@ -67,41 +57,12 @@ public class ServiceImpl implements TravelService {
         while (currentStep < (maxRow + step)) {
 
             List<TravelDTO> travelDTOList = dao.getTravelsByClientIdsRange(currentStep, (currentStep + step));
-
             for (Long clientId : travelDTOList.stream().map(TravelDTO::getClientId).distinct().toList()) {
                 executorService.submit(new Runnable() {
                     @Override
                     public void run() {
-                        AggregateDTO aggregateDTO = new AggregateDTO();
                         List<TravelDTO> travelByIdList = travelDTOList.stream().filter(travelDTO -> travelDTO.getClientId().equals(clientId)).toList();
-                        int cntAllTrans = calculateAggregate.findCountAllTrans(travelByIdList);
-                        int cntAllTransOneYear = calculateAggregate.findCountAllTransInLastYears(travelByIdList, 1);
-                        int cntAllTransFiveYears = calculateAggregate.findCountAllTransInLastYears(travelByIdList, 5);
-                        int cntAllTransBeforeEighteenYears = calculateAggregate.findCountTransByAge(travelByIdList, 18, true);
-                        int cntAllTransAfterEighteenYears = calculateAggregate.findCountTransByAge(travelByIdList, 18, false);
-                        TravelStatistic travelStatistic = calculateAggregate.findTravelStatistics(travelByIdList);
-                        int minCntOfDaysInSamePlace = travelStatistic.getMax();
-                        int maxCntOfDaysInSamePlace = travelStatistic.getMin();
-                        double avgCntOfDaysInSamePlace = travelStatistic.getAvg();
-                        int cntAllTransCar = calculateAggregate.findCountAllTransByType(travelByIdList, "CAR");
-                        int cntAllTransBus = calculateAggregate.findCountAllTransByType(travelByIdList, "BUS");
-                        int cntAllTransPlane = calculateAggregate.findCountAllTransByType(travelByIdList, "PLANE");
-                        int cntAllTransTrain = calculateAggregate.findCountAllTransByType(travelByIdList, "TRAIN");
-
-                        aggregateDTO.setClientId(clientId);
-                        aggregateDTO.setCntAllTrans(cntAllTrans);
-                        aggregateDTO.setCntAllTransOneYear(cntAllTransOneYear);
-                        aggregateDTO.setCntAllTransFiveYears(cntAllTransFiveYears);
-                        aggregateDTO.setCntAllTransBeforeEighteenYears(cntAllTransBeforeEighteenYears);
-                        aggregateDTO.setCntAllTransAfterEighteenYears(cntAllTransAfterEighteenYears);
-                        aggregateDTO.setMaxCntOfDaysInSamePlace(maxCntOfDaysInSamePlace);
-                        aggregateDTO.setMinCntOfDaysInSamePlace(minCntOfDaysInSamePlace);
-                        aggregateDTO.setAvgCntOfDaysInSamePlace(avgCntOfDaysInSamePlace);
-                        aggregateDTO.setCntAllTransCar(cntAllTransCar);
-                        aggregateDTO.setCntAllTransBus(cntAllTransBus);
-                        aggregateDTO.setCntAllTransPlane(cntAllTransPlane);
-                        aggregateDTO.setCntAllTransTrain(cntAllTransTrain);
-                        dao.calculateAggregatesFromJava(aggregateDTO);
+                        dao.calculateAggregates(new AggregateCalculator(travelByIdList).createAggregateDTO(clientId));
                     }
                 });
             }

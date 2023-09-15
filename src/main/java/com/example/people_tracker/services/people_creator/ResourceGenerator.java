@@ -1,6 +1,8 @@
 package com.example.people_tracker.services.people_creator;
 
+import lombok.Data;
 import org.springframework.stereotype.Component;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -20,7 +22,7 @@ public class ResourceGenerator {
         try {
             URI uri = new URI(urlString);
             URL url = uri.toURL();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))){
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     result.add(line);
@@ -66,6 +68,14 @@ public class ResourceGenerator {
         int day = generateRandomValue(minMonthDay, maxDay);
 
         return LocalDate.of(year, month, day);
+    }
+
+    @Data
+    static class TravelStatistic {
+
+        private int max;
+        private int min;
+        private double avg;
     }
 
 }

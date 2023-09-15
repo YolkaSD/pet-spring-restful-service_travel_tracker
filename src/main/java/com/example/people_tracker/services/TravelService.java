@@ -13,11 +13,10 @@ public interface TravelService {
 
     List<ClientDTO> getClientList();
 
-    void calculateAggregatesFromDB();
+    AggregateDTO getAggregateByClientId(Long clientId);
 
-    void calculateAggregatesFromJava();
+    void calculateAggregates();
 
     void createPeople();
 
-    AggregateDTO getAggregateByClientId(Long clientId);
 }

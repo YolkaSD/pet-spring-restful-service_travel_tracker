@@ -8,51 +8,45 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/travel")
 public class PeopleTrackerController {
 
     private final TravelService travelService;
 
     public PeopleTrackerController(TravelService travelService) {
+
         this.travelService = travelService;
     }
 
-    @PostMapping("/travel/add")
-    public String addNewTravel(@RequestBody TravelDTO travelDTO) {
+    @PostMapping("/add")
+    public void addNewTravel(@RequestBody TravelDTO travelDTO) {
+
         travelService.add(travelDTO);
-        return null;
     }
 
-    @PostMapping("/travel/addfromlist")
-    public String addNewTravelFromList(@RequestBody List<TravelDTO> travelDTOList) {
+    @PostMapping("/addfromlist")
+    public void addNewTravelFromList(@RequestBody List<TravelDTO> travelDTOList) {
+
         travelService.addNewTravelFromList(travelDTOList);
-        return null;
     }
 
-    @GetMapping("/travel/clients")
+    @GetMapping("/clients")
     public List<ClientDTO> getAllClients() {
+
         return travelService.getClientList();
     }
 
-//    @PostMapping("/travel/aggregates/calculate/fromdb")
-//    public String calculateAggregatesFromDB() {
-//        long startTime = System.currentTimeMillis();
-//        travelService.calculateAggregatesFromDB();
-//        long endTime = System.currentTimeMillis();
-//        System.out.println("TimeMillis: " + (startTime - endTime));
-//        return null;
-//    }
+    @PostMapping("/aggregates/calculate")
+    public void calculateAggregates() {
 
-    @PostMapping("/travel/aggregates/calculate/fromjava")
-    public String calculateAggregatesFromJava() {
         long startTime = System.currentTimeMillis();
-        travelService.calculateAggregatesFromJava();
+        travelService.calculateAggregates();
         long endTime = System.currentTimeMillis();
         System.out.println("TimeMillis: " + (endTime - startTime));
 
-        return null;
     }
 
-    @GetMapping("/travel/{client_id}/aggregates")
+    @GetMapping("/{client_id}/aggregates")
     public AggregateDTO getClientAggregates(@PathVariable("client_id") Long clientId) {
 
         return travelService.getAggregateByClientId(clientId);

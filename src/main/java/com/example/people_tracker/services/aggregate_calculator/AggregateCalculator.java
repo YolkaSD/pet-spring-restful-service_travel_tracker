@@ -1,22 +1,33 @@
 package com.example.people_tracker.services.aggregate_calculator;
 
+import com.example.people_tracker.models.AggregateDTO;
 import com.example.people_tracker.models.TravelDTO;
+import lombok.Data;
 import org.antlr.v4.runtime.misc.Pair;
-import org.springframework.stereotype.Component;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-@Component
+
 public class AggregateCalculator {
 
-    public int findCountAllTrans(List<TravelDTO> travelDTOList) {
+    private final TravelStatistic travelStatistic;
+
+    private final List<TravelDTO> travelDTOList;
+
+    public AggregateCalculator(List<TravelDTO> travelDTOList) {
+        this.travelStatistic = new TravelStatistic(travelDTOList);
+        this.travelDTOList = travelDTOList;
+    }
+
+    private int findCountAllTrans() {
 
         return travelDTOList.size();
     }
 
-    public int findCountAllTransInLastYears(List<TravelDTO> travelDTOList, int years) {
+    private int findCountAllTransInLastYears(int years) {
 
         return (int) travelDTOList.stream()
                 .map(TravelDTO::getDepartureTime)
@@ -24,7 +35,7 @@ public class AggregateCalculator {
                 .count();
     }
 
-    public int findCountTransByAge(List<TravelDTO> travelDTOList, int age, boolean before) {
+    private int findCountTransByAge(int age, boolean before) {
 
         return (int) travelDTOList.stream().
                 map(travelDTO -> new Pair<>(travelDTO.getBirthday(), travelDTO.getDepartureTime()))
@@ -32,7 +43,7 @@ public class AggregateCalculator {
                 .count();
     }
 
-    public int findCountAllTransByType(List<TravelDTO> travelDTOList, String transport) {
+    private int findCountAllTransByType(String transport) {
 
         return (int) travelDTOList.stream()
                 .map(TravelDTO::getTransportType)
@@ -40,47 +51,85 @@ public class AggregateCalculator {
                 .count();
     }
 
-    public TravelStatistic findTravelStatistics(List<TravelDTO> travelDTOList) {
-
-        TravelStatistic travelStatistic = new TravelStatistic();
-
-        int max = 0;
-        int min = Integer.MAX_VALUE;
-        int sum = 0;
-
-        for (int i = 0; i < travelDTOList.size() - 1; i++) {
-            TravelDTO current = travelDTOList.get(i);
-            TravelDTO next = travelDTOList.get(i + 1);
-
-            LocalDateTime destinationTime = current.getDestinationTime();
-            LocalDateTime departureTime = next.getDepartureTime();
-
-            int daysWithoutTravel = (int) ChronoUnit.DAYS.between(destinationTime, departureTime);
-            if (daysWithoutTravel > max) {
-                max = daysWithoutTravel;
-            }
-            if (daysWithoutTravel < min) {
-                min = daysWithoutTravel;
-            }
-            sum += daysWithoutTravel;
-        }
-
-        int count = travelDTOList.size() - 1;
-        double avg = (double) sum / count;
-
-        travelStatistic.setMax(max);
-        travelStatistic.setMin(min);
-        travelStatistic.setAvg(avg);
-
-        return travelStatistic;
-    }
 
     private boolean isTransBeforeEighteen(Pair<LocalDate, LocalDateTime> pair, int age, boolean before) {
+
         LocalDate birthday = pair.a;
         LocalDateTime departureTime = pair.b;
 
         return before == departureTime.isBefore(birthday.plusYears(age).atStartOfDay());
     }
 
+    private int getMax() {
+
+        return travelStatistic.max;
+    }
+
+    private int getMin() {
+
+        return travelStatistic.min;
+    }
+
+    private double getAvg() {
+
+        return travelStatistic.avg;
+    }
+
+    public AggregateDTO createAggregateDTO(Long clientId) {
+
+        AggregateDTO aggregateDTO = new AggregateDTO();
+
+        aggregateDTO.setClientId(clientId);
+        aggregateDTO.setCntAllTrans(findCountAllTrans());
+        aggregateDTO.setCntAllTransOneYear(findCountAllTransInLastYears(1));
+        aggregateDTO.setCntAllTransFiveYears(findCountAllTransInLastYears(5));
+        aggregateDTO.setCntAllTransBeforeEighteenYears(findCountTransByAge(18, true));
+        aggregateDTO.setCntAllTransAfterEighteenYears(findCountTransByAge(18, false));
+        aggregateDTO.setMaxCntOfDaysInSamePlace(getMax());
+        aggregateDTO.setMinCntOfDaysInSamePlace(getMin());
+        aggregateDTO.setAvgCntOfDaysInSamePlace(getAvg());
+        aggregateDTO.setCntAllTransCar(findCountAllTransByType("CAR"));
+        aggregateDTO.setCntAllTransBus(findCountAllTransByType("BUS"));
+        aggregateDTO.setCntAllTransPlane(findCountAllTransByType("PLANE"));
+        aggregateDTO.setCntAllTransTrain(findCountAllTransByType("TRAIN"));
+        return aggregateDTO;
+    }
+
+    @Data
+    static class TravelStatistic {
+
+        int max = 0;
+        int min = Integer.MAX_VALUE;
+        double avg = 0;
+
+        public TravelStatistic(List<TravelDTO> travelDTOList) {
+            findTravelStatistics(travelDTOList);
+        }
+
+        private void findTravelStatistics(List<TravelDTO> travelDTOList) {
+            int sum = 0;
+            for (int i = 0; i < travelDTOList.size() - 1; i++) {
+                TravelDTO current = travelDTOList.get(i);
+                TravelDTO next = travelDTOList.get(i + 1);
+
+                LocalDateTime destinationTime = current.getDestinationTime();
+                LocalDateTime departureTime = next.getDepartureTime();
+
+                int daysWithoutTravel = (int) ChronoUnit.DAYS.between(destinationTime, departureTime);
+                if (daysWithoutTravel > max) {
+                    max = daysWithoutTravel;
+                }
+                if (daysWithoutTravel < min) {
+                    min = daysWithoutTravel;
+                }
+                sum += daysWithoutTravel;
+            }
+
+            int count = travelDTOList.size() - 1;
+            avg = (double) sum / count;
+
+        }
+
+    }
 
 }

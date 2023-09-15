@@ -117,7 +117,7 @@ public class DaoImpl implements DaoTravel {
     }
 
     @Override
-    public void calculateAggregatesFromJava(AggregateDTO aggregateDTO) {
+    public void calculateAggregates(AggregateDTO aggregateDTO) {
         String sql = """
                 INSERT INTO
                     store_travel.travel_aggregates
@@ -158,7 +158,7 @@ public class DaoImpl implements DaoTravel {
     }
 
     @Override
-    public void calculateAggregatesFromJava(List<AggregateDTO> aggregateDTOList){
+    public void calculateAggregates(List<AggregateDTO> aggregateDTOList){
         String sql = """
                 INSERT INTO
                     store_travel.travel_aggregates
