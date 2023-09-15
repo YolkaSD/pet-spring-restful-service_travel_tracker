@@ -287,4 +287,36 @@ public class DaoImpl implements DaoTravel {
 
         return jdbcTemplate.queryForObject(sql, Integer.class);
     }
+
+    @Override
+    public AggregateDTO getAggregateByClientId(Long clientId) {
+        String sql = """
+                SELECT
+                    *
+                FROM
+                    store_travel.travel_aggregates
+                WHERE
+                    client_id = ?
+                """;
+        return jdbcTemplate.queryForObject(sql, new RowMapper<AggregateDTO>() {
+            @Override
+            public AggregateDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
+                AggregateDTO aggregateDTO = new AggregateDTO();
+                aggregateDTO.setClientId(rs.getLong("client_id"));
+                aggregateDTO.setCntAllTrans(rs.getInt("cnt_all_trans"));
+                aggregateDTO.setCntAllTransOneYear(rs.getInt("cnt_all_trans_1year"));
+                aggregateDTO.setCntAllTransFiveYears(rs.getInt("cnt_all_trans_5years"));
+                aggregateDTO.setCntAllTransBeforeEighteenYears(rs.getInt("cnt_all_trans_before18yo"));
+                aggregateDTO.setCntAllTransAfterEighteenYears(rs.getInt("cnt_all_trans_after18yo"));
+                aggregateDTO.setMaxCntOfDaysInSamePlace(rs.getInt("max_cnt_of_days_in_same_place"));
+                aggregateDTO.setMinCntOfDaysInSamePlace(rs.getInt("min_cnt_of_days_in_same_place"));
+                aggregateDTO.setAvgCntOfDaysInSamePlace(rs.getDouble("avg_cnt_of_days_in_same_place"));
+                aggregateDTO.setCntAllTransCar(rs.getInt("cnt_all_trans_car"));
+                aggregateDTO.setCntAllTransBus(rs.getInt("cnt_all_trans_bus"));
+                aggregateDTO.setCntAllTransPlane(rs.getInt("cnt_all_trans_plane"));
+                aggregateDTO.setCntAllTrans(rs.getInt("cnt_all_trans_train"));
+                return aggregateDTO;
+            }
+        }, clientId);
+    }
 }

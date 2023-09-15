@@ -1,5 +1,6 @@
 package com.example.people_tracker.services;
 
+import com.example.people_tracker.models.AggregateDTO;
 import com.example.people_tracker.models.ClientDTO;
 import com.example.people_tracker.models.TravelDTO;
 
@@ -17,4 +18,6 @@ public interface TravelService {
     void calculateAggregatesFromJava();
 
     void createPeople();
+
+    AggregateDTO getAggregateByClientId(Long clientId);
 }

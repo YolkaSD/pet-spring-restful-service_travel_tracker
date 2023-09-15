@@ -1,5 +1,6 @@
 package com.example.people_tracker.controllers;
 
+import com.example.people_tracker.models.AggregateDTO;
 import com.example.people_tracker.models.ClientDTO;
 import com.example.people_tracker.models.TravelDTO;
 import com.example.people_tracker.services.TravelService;
@@ -51,9 +52,10 @@ public class PeopleTrackerController {
         return null;
     }
 
-//    @GetMapping("/travel/{client_id}/aggregates")
-//    public ClientAggregatesDTO getClientAggregates(@PathVariable("client_id") Long clientId) {
-//        return null;
-//    }
+    @GetMapping("/travel/{client_id}/aggregates")
+    public AggregateDTO getClientAggregates(@PathVariable("client_id") Long clientId) {
+
+        return travelService.getAggregateByClientId(clientId);
+    }
 
 }

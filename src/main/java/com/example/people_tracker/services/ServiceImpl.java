@@ -47,6 +47,12 @@ public class ServiceImpl implements TravelService {
         return dao.getClientList();
     }
 
+
+    @Override
+    public AggregateDTO getAggregateByClientId(Long clientId) {
+        return dao.getAggregateByClientId(clientId);
+    }
+
     @Override
     public void calculateAggregatesFromDB() {
         dao.calculateAggregatesFromDB();

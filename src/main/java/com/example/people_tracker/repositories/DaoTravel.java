@@ -28,4 +28,6 @@ public interface DaoTravel {
     List<TravelDTO> getTravelsByClientIdsRange(int min, int max);
 
     Integer getMaxRowByTableTravels();
+
+    AggregateDTO getAggregateByClientId(Long clientId);
 }
