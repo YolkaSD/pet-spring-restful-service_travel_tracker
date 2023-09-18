@@ -301,7 +301,7 @@ public class DaoImpl implements DaoTravel {
         return jdbcTemplate.queryForObject(sql, new RowMapper<AggregateDTO>() {
             @Override
             public AggregateDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
-                AggregateDTO aggregateDTO = new AggregateDTO();
+                AggregateDTO aggregateDTO = AggregateDTO.builder().build();
                 aggregateDTO.setClientId(rs.getLong("client_id"));
                 aggregateDTO.setCntAllTrans(rs.getInt("cnt_all_trans"));
                 aggregateDTO.setCntAllTransOneYear(rs.getInt("cnt_all_trans_1year"));
