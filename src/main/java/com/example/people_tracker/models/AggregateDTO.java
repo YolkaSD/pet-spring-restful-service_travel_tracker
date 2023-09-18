@@ -1,8 +1,10 @@
 package com.example.people_tracker.models;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class AggregateDTO {
     private long clientId;
     private int cntAllTrans;

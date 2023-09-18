@@ -77,22 +77,20 @@ public class AggregateCalculator {
 
     public AggregateDTO createAggregateDTO(Long clientId) {
 
-        AggregateDTO aggregateDTO = new AggregateDTO();
-
-        aggregateDTO.setClientId(clientId);
-        aggregateDTO.setCntAllTrans(findCountAllTrans());
-        aggregateDTO.setCntAllTransOneYear(findCountAllTransInLastYears(1));
-        aggregateDTO.setCntAllTransFiveYears(findCountAllTransInLastYears(5));
-        aggregateDTO.setCntAllTransBeforeEighteenYears(findCountTransByAge(18, true));
-        aggregateDTO.setCntAllTransAfterEighteenYears(findCountTransByAge(18, false));
-        aggregateDTO.setMaxCntOfDaysInSamePlace(getMax());
-        aggregateDTO.setMinCntOfDaysInSamePlace(getMin());
-        aggregateDTO.setAvgCntOfDaysInSamePlace(getAvg());
-        aggregateDTO.setCntAllTransCar(findCountAllTransByType("CAR"));
-        aggregateDTO.setCntAllTransBus(findCountAllTransByType("BUS"));
-        aggregateDTO.setCntAllTransPlane(findCountAllTransByType("PLANE"));
-        aggregateDTO.setCntAllTransTrain(findCountAllTransByType("TRAIN"));
-        return aggregateDTO;
+        return AggregateDTO.builder()
+                .clientId(clientId)
+                .cntAllTrans(findCountAllTrans())
+                .cntAllTransOneYear(findCountAllTransInLastYears(1))
+                .cntAllTransFiveYears(findCountAllTransInLastYears(5))
+                .cntAllTransBeforeEighteenYears(findCountTransByAge(18, true))
+                .maxCntOfDaysInSamePlace(getMax())
+                .minCntOfDaysInSamePlace(getMin())
+                .avgCntOfDaysInSamePlace(getAvg())
+                .cntAllTransCar(findCountAllTransByType("CAR"))
+                .cntAllTransBus(findCountAllTransByType("BUS"))
+                .cntAllTransPlane(findCountAllTransByType("PLANE"))
+                .cntAllTransTrain(findCountAllTransByType("TRAIN"))
+                .build();
     }
 
     @Data
