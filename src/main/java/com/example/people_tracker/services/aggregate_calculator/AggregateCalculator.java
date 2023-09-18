@@ -1,10 +1,8 @@
 package com.example.people_tracker.services.aggregate_calculator;
-
 import com.example.people_tracker.models.AggregateDTO;
 import com.example.people_tracker.models.TravelDTO;
 import lombok.Data;
 import org.antlr.v4.runtime.misc.Pair;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -83,6 +81,7 @@ public class AggregateCalculator {
                 .cntAllTransOneYear(findCountAllTransInLastYears(1))
                 .cntAllTransFiveYears(findCountAllTransInLastYears(5))
                 .cntAllTransBeforeEighteenYears(findCountTransByAge(18, true))
+                .cntAllTransAfterEighteenYears(findCountTransByAge(18, false))
                 .maxCntOfDaysInSamePlace(getMax())
                 .minCntOfDaysInSamePlace(getMin())
                 .avgCntOfDaysInSamePlace(getAvg())
