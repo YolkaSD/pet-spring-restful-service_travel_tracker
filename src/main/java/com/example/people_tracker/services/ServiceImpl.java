@@ -62,7 +62,7 @@ public class ServiceImpl implements TravelService {
                     @Override
                     public void run() {
                         List<TravelDTO> travelByIdList = travelDTOList.stream().filter(travelDTO -> travelDTO.getClientId().equals(clientId)).toList();
-                        dao.calculateAggregates(new AggregateCalculator(travelByIdList).createAggregateDTO(clientId));
+                        dao.calculateAggregates(new AggregateCalculator(travelByIdList).createAggregateDTO());
                     }
                 });
             }

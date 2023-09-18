@@ -75,10 +75,10 @@ public class AggregateCalculator {
         return travelStatistic.avg;
     }
 
-    public AggregateDTO createAggregateDTO(Long clientId) {
+    public AggregateDTO createAggregateDTO() {
 
         return AggregateDTO.builder()
-                .clientId(clientId)
+                .clientId(travelDTOList.get(0).getClientId())
                 .cntAllTrans(findCountAllTrans())
                 .cntAllTransOneYear(findCountAllTransInLastYears(1))
                 .cntAllTransFiveYears(findCountAllTransInLastYears(5))
