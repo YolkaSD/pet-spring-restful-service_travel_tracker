@@ -2,7 +2,6 @@ package com.example.people_tracker.repositories;
 
 import com.example.people_tracker.models.ClientDTO;
 import org.springframework.jdbc.core.RowMapper;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 

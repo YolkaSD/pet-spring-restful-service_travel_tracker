@@ -2,7 +2,6 @@ package com.example.people_tracker.repositories;
 
 import com.example.people_tracker.models.TravelDTO;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

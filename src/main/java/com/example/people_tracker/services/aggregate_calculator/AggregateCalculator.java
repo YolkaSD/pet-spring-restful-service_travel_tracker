@@ -11,21 +11,15 @@ import java.util.List;
 
 public class AggregateCalculator {
 
-    private final TravelStatistic travelStatistic;
+    private static TravelStatistic travelStatistic = null;
 
-    private final List<TravelDTO> travelDTOList;
 
-    public AggregateCalculator(List<TravelDTO> travelDTOList) {
-        this.travelStatistic = new TravelStatistic(travelDTOList);
-        this.travelDTOList = travelDTOList;
-    }
-
-    private int findCountAllTrans() {
+    private static int findCountAllTrans(List<TravelDTO> travelDTOList) {
 
         return travelDTOList.size();
     }
 
-    private int findCountAllTransInLastYears(int years) {
+    private static int findCountAllTransInLastYears(List<TravelDTO> travelDTOList, int years) {
 
         return (int) travelDTOList.stream()
                 .map(TravelDTO::getDepartureTime)
@@ -33,7 +27,7 @@ public class AggregateCalculator {
                 .count();
     }
 
-    private int findCountTransByAge(int age, boolean before) {
+    private static int findCountTransByAge(List<TravelDTO> travelDTOList, int age, boolean before) {
 
         return (int) travelDTOList.stream().
                 map(travelDTO -> new Pair<>(travelDTO.getBirthday(), travelDTO.getDepartureTime()))
@@ -41,7 +35,7 @@ public class AggregateCalculator {
                 .count();
     }
 
-    private int findCountAllTransByType(String transport) {
+    private static int findCountAllTransByType(List<TravelDTO> travelDTOList, String transport) {
 
         return (int) travelDTOList.stream()
                 .map(TravelDTO::getTransportType)
@@ -50,7 +44,7 @@ public class AggregateCalculator {
     }
 
 
-    private boolean isTransBeforeEighteen(Pair<LocalDate, LocalDateTime> pair, int age, boolean before) {
+    private static boolean isTransBeforeEighteen(Pair<LocalDate, LocalDateTime> pair, int age, boolean before) {
 
         LocalDate birthday = pair.a;
         LocalDateTime departureTime = pair.b;
@@ -58,37 +52,38 @@ public class AggregateCalculator {
         return before == departureTime.isBefore(birthday.plusYears(age).atStartOfDay());
     }
 
-    private int getMax() {
+    private static int getMax() {
 
         return travelStatistic.max;
     }
 
-    private int getMin() {
+    private static int getMin() {
 
         return travelStatistic.min;
     }
 
-    private double getAvg() {
+    private static double getAvg() {
 
         return travelStatistic.avg;
     }
 
-    public AggregateDTO createAggregateDTO() {
+    public static AggregateDTO createAggregateDTO(List<TravelDTO> travelDTOList) {
+        travelStatistic = new TravelStatistic(travelDTOList);
 
         return AggregateDTO.builder()
                 .clientId(travelDTOList.get(0).getClientId())
-                .cntAllTrans(findCountAllTrans())
-                .cntAllTransOneYear(findCountAllTransInLastYears(1))
-                .cntAllTransFiveYears(findCountAllTransInLastYears(5))
-                .cntAllTransBeforeEighteenYears(findCountTransByAge(18, true))
-                .cntAllTransAfterEighteenYears(findCountTransByAge(18, false))
+                .cntAllTrans(findCountAllTrans(travelDTOList))
+                .cntAllTransOneYear(findCountAllTransInLastYears(travelDTOList, 1))
+                .cntAllTransFiveYears(findCountAllTransInLastYears(travelDTOList, 5))
+                .cntAllTransBeforeEighteenYears(findCountTransByAge(travelDTOList, 18, true))
+                .cntAllTransAfterEighteenYears(findCountTransByAge(travelDTOList, 18, false))
                 .maxCntOfDaysInSamePlace(getMax())
                 .minCntOfDaysInSamePlace(getMin())
                 .avgCntOfDaysInSamePlace(getAvg())
-                .cntAllTransCar(findCountAllTransByType("CAR"))
-                .cntAllTransBus(findCountAllTransByType("BUS"))
-                .cntAllTransPlane(findCountAllTransByType("PLANE"))
-                .cntAllTransTrain(findCountAllTransByType("TRAIN"))
+                .cntAllTransCar(findCountAllTransByType(travelDTOList, "CAR"))
+                .cntAllTransBus(findCountAllTransByType(travelDTOList, "BUS"))
+                .cntAllTransPlane(findCountAllTransByType(travelDTOList, "PLANE"))
+                .cntAllTransTrain(findCountAllTransByType(travelDTOList, "TRAIN"))
                 .build();
     }
 

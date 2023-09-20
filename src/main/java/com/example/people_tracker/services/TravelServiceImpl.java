@@ -60,7 +60,7 @@ public class TravelServiceImpl implements TravelService {
                     List<AggregateDTO> aggregateDTOList = new ArrayList<>();
                     for (Long clientId : travelDTOList.stream().map(TravelDTO::getClientId).distinct().toList()) {
                         List<TravelDTO> travelByIdList = travelDTOList.stream().filter(travelDTO -> travelDTO.getClientId().equals(clientId)).toList();
-                        aggregateDTOList.add(new AggregateCalculator(travelByIdList).createAggregateDTO());
+                        aggregateDTOList.add(AggregateCalculator.createAggregateDTO(travelByIdList));
                     }
                     dao.calculateAggregates(aggregateDTOList);
                 }

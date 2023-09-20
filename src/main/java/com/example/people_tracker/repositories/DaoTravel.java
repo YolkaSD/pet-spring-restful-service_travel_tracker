@@ -13,16 +13,9 @@ public interface DaoTravel {
 
     List<ClientDTO> getClientList();
 
-    void calculateAggregatesFromDB();
-
     void calculateAggregates(AggregateDTO aggregateDTO);
     void calculateAggregates(List<AggregateDTO> aggregateDTOList);
 
-    List<Long> getClientIdList();
-
-    List<TravelDTO> getTravelDTOListById(Long clientId);
-
-    List<TravelDTO> getAllTravelDTOList();
 
     List<TravelDTO> getTravelsByClientIdsRange(int min, int max);
 
