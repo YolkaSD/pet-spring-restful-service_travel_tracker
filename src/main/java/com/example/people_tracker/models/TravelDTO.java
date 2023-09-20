@@ -2,8 +2,6 @@ package com.example.people_tracker.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

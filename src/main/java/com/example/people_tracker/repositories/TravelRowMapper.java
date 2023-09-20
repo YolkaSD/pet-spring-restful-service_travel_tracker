@@ -3,10 +3,8 @@ package com.example.people_tracker.repositories;
 import com.example.people_tracker.models.TransportType;
 import com.example.people_tracker.models.TravelDTO;
 import org.springframework.jdbc.core.RowMapper;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 
 public class TravelRowMapper implements RowMapper<TravelDTO> {
     @Override
