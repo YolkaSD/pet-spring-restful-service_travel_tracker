@@ -14,10 +14,12 @@ import java.util.concurrent.*;
 public class TravelServiceImpl implements TravelService {
 
     private final DaoTravel dao;
+    private final ExecutorService executorService;
 
     @Autowired
     public TravelServiceImpl(DaoTravel dao) {
 
+        executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         this.dao = dao;
     }
 
@@ -50,7 +52,6 @@ public class TravelServiceImpl implements TravelService {
         int maxRow = dao.getMaxRowByTableTravels();
         int step = 500;
         int currentStep = 0;
-        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         while (currentStep < (maxRow + step)) {
 
             List<TravelDTO> travelDTOList = dao.getTravelsByClientIdsRange(currentStep, (currentStep + step));

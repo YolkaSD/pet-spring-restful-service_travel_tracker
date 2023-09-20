@@ -13,6 +13,26 @@ public class AggregateCalculator {
 
     private static TravelStatistic travelStatistic = null;
 
+    public static AggregateDTO createAggregateDTO(List<TravelDTO> travelDTOList) {
+        travelStatistic = new TravelStatistic(travelDTOList);
+
+        return AggregateDTO.builder()
+                .clientId(travelDTOList.get(0).getClientId())
+                .cntAllTrans(findCountAllTrans(travelDTOList))
+                .cntAllTransOneYear(findCountAllTransInLastYears(travelDTOList, 1))
+                .cntAllTransFiveYears(findCountAllTransInLastYears(travelDTOList, 5))
+                .cntAllTransBeforeEighteenYears(findCountTransByAge(travelDTOList, 18, true))
+                .cntAllTransAfterEighteenYears(findCountTransByAge(travelDTOList, 18, false))
+                .maxCntOfDaysInSamePlace(getMax())
+                .minCntOfDaysInSamePlace(getMin())
+                .avgCntOfDaysInSamePlace(getAvg())
+                .cntAllTransCar(findCountAllTransByType(travelDTOList, "CAR"))
+                .cntAllTransBus(findCountAllTransByType(travelDTOList, "BUS"))
+                .cntAllTransPlane(findCountAllTransByType(travelDTOList, "PLANE"))
+                .cntAllTransTrain(findCountAllTransByType(travelDTOList, "TRAIN"))
+                .build();
+    }
+
 
     private static int findCountAllTrans(List<TravelDTO> travelDTOList) {
 
@@ -67,32 +87,12 @@ public class AggregateCalculator {
         return travelStatistic.avg;
     }
 
-    public static AggregateDTO createAggregateDTO(List<TravelDTO> travelDTOList) {
-        travelStatistic = new TravelStatistic(travelDTOList);
-
-        return AggregateDTO.builder()
-                .clientId(travelDTOList.get(0).getClientId())
-                .cntAllTrans(findCountAllTrans(travelDTOList))
-                .cntAllTransOneYear(findCountAllTransInLastYears(travelDTOList, 1))
-                .cntAllTransFiveYears(findCountAllTransInLastYears(travelDTOList, 5))
-                .cntAllTransBeforeEighteenYears(findCountTransByAge(travelDTOList, 18, true))
-                .cntAllTransAfterEighteenYears(findCountTransByAge(travelDTOList, 18, false))
-                .maxCntOfDaysInSamePlace(getMax())
-                .minCntOfDaysInSamePlace(getMin())
-                .avgCntOfDaysInSamePlace(getAvg())
-                .cntAllTransCar(findCountAllTransByType(travelDTOList, "CAR"))
-                .cntAllTransBus(findCountAllTransByType(travelDTOList, "BUS"))
-                .cntAllTransPlane(findCountAllTransByType(travelDTOList, "PLANE"))
-                .cntAllTransTrain(findCountAllTransByType(travelDTOList, "TRAIN"))
-                .build();
-    }
-
     @Data
     static class TravelStatistic {
 
-        int max = 0;
-        int min = Integer.MAX_VALUE;
-        double avg = 0;
+        private int max = 0;
+        private int min = Integer.MAX_VALUE;
+        private double avg = 0;
 
         public TravelStatistic(List<TravelDTO> travelDTOList) {
             findTravelStatistics(travelDTOList);
